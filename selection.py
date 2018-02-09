@@ -148,6 +148,37 @@ def build_list_repr(s):
         blr_nextstate(*state)
     return state[3]
 
+
+def check_contiguous_pair(s, parent, child):
+    if parent & child == 0:
+        return True
+    t = trace(s, parent)
+    prevInChild = False
+    foundUpEdge = False
+    for x in t:
+        inChild = (1 << x) & child != 0
+        isEdge = inChild and not prevInChild
+        if foundUpEdge and isEdge:
+            return False
+        foundUpEdge |= isEdge
+        prevInChild = inChild
+    return True
+
+def check_contiguous(s, h):
+    t = trace(s, h)
+    if len(t) == 1:
+        return False
+    for i in range(1, len(s)):
+        if not check_contiguous_pair(s, i, h):
+            return False
+    return True
+
+def contiguous_elems(s):
+    for h in range(1, len(s)):
+        if check_contiguous(s, h):
+            yield h
+
+
 def alpha(n):
     def maxud(bs):
         return max((b for b in bs if not b-1 in bs))
