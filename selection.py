@@ -178,7 +178,6 @@ def contiguous_elems(s):
         if check_contiguous(s, h):
             yield h
 
-
 def alpha(n):
     def maxud(bs):
         return max((b for b in bs if not b-1 in bs))
@@ -190,7 +189,37 @@ def maximize(state, f, x):
         state[0] = x
         state[1] = v
     
+def split_trace_before_and_after(s, h, t):
+    isAfter = False
+    before = []
+    after = []
+    for y in t:
+        if (1 << y) & h != 0:
+            isAfter = True
+        else:
+            if isAfter:
+                after.append(y)
+            else:
+                before.append(y)
+    return (tuple(before), tuple(after))
 
+def is_contractible(s, cont):
+    m = {}
+    for h in range(1, len(s)):
+        tba = split_trace_before_and_after(s, cont, trace(s, h))
+        index = h & ~cont
+        if index in m:
+            prevTba = m[index]
+            if prevTba != tba:
+                return False
+        m[index] = tba
+    return True
+
+def has_contractible_subset(s):
+    for cont in contiguous_elems(s):
+        if is_contractible(s, cont):
+            return True
+    return False
 
 def generate_selections(R, N, L, selSet):
     loopProg = Progress(1)
