@@ -1,7 +1,7 @@
 from random import Random
 from collections import defaultdict
 from itertools import combinations
-
+from util import Progress 
 
 def iterbits(h):
     z = 0
@@ -191,4 +191,17 @@ def maximize(state, f, x):
         state[1] = v
     
 
+
+def generate_selections(R, N, L, selSet):
+    loopProg = Progress(1)
+    setProg = Progress(300)
+    for i in range(L):
+        s = randsel(R, N)
+        l = findloop(invert, s)
+        if l[1] == 2:
+            s = l[2]
+            selSet.add(canonical(s))
+            selSet.add(canonical(invert(s)))
+        loopProg.update("Loop: " + str(i // 10000))
+        setProg.update("#: " + str(len(selSet)))
 
