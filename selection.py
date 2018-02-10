@@ -165,8 +165,8 @@ def check_contiguous_pair(s, parent, child):
     return True
 
 def check_contiguous(s, h):
-    t = trace(s, h)
-    if len(t) == 1:
+    t = bits(h)
+    if len(t) == 1 or 1 << len(t) == len(s):
         return False
     for i in range(1, len(s)):
         if not check_contiguous_pair(s, i, h):
@@ -206,6 +206,8 @@ def split_trace_before_and_after(s, h, t):
 def is_contractible(s, cont):
     m = {}
     for h in range(1, len(s)):
+        if h & cont == 0:
+            continue
         tba = split_trace_before_and_after(s, cont, trace(s, h))
         index = h & ~cont
         if index in m:
@@ -220,6 +222,11 @@ def has_contractible_subset(s):
         if is_contractible(s, cont):
             return True
     return False
+
+def contractible_subsets(s):
+    for cont in contiguous_elems(s):
+        if is_contractible(s, cont):
+            yield cont
 
 def generate_selections(R, N, L, selSet):
     loopProg = Progress(1)
