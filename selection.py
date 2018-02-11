@@ -241,3 +241,53 @@ def generate_selections(R, N, L, selSet):
         loopProg.update("Loop: " + str(i // 10000))
         setProg.update("#: " + str(len(selSet)))
 
+def generate_all_rsms(N):
+    cs = list(combinations(range(N), 2))
+    def generate_rsms(cs, i, current):
+        if i == len(cs):
+            yield current
+        else:
+            (a,b)=cs[i]
+            current.append((0, a, b))
+            for r in generate_rsms(cs, i+1, current):
+                yield r
+            current.pop()
+            current.append((0, b, a))
+            for r in generate_rsms(cs, i+1, current):
+                yield r
+            current.pop()
+            current.append((1, a, b))
+            for r in generate_rsms(cs, i+1, current):
+                yield r
+            current.pop()
+            current.append((1, b,a))
+            for r in generate_rsms(cs, i+1, current):
+                yield r
+            current.pop()
+    def build_dominators(rsm):
+        dom0 = defaultdict(lambda:set())
+        dom1 = defaultdict(lambda:set())
+        dom = (dom0, dom1)
+        for (i, a, b) in rsm:
+            dom[i][b].add(a)
+        return dom
+    def survivors(dom, vals):
+        s1 = set((v for v in vals if len(vals & dom[v]) == 0))
+        return s1
+    def survivors2(dom1, dom2, vals):
+        return survivors(dom2, survivors(dom1, vals))
+    def dom_to_sel(N, dom1, dom2):
+        result = [None] * (1 << N)
+        for i in range(1, 1<<N):
+            b = set(bits(i))
+            surv = survivors2(dom1, dom2, b)
+            if len(surv) != 1:
+                return None
+            result[i] = next(iter(surv))
+        return tuple(result)
+    for rsm in generate_rsms(cs, 0, []):
+        doms = build_dominators(rsm)
+        s = dom_to_sel(N, doms[0], doms[1])
+        if s != None:
+            yield s
+
