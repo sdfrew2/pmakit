@@ -241,6 +241,16 @@ def generate_selections(R, N, L, selSet):
         loopProg.update("Loop: " + str(i // 10000))
         setProg.update("#: " + str(len(selSet)))
 
+def terminal_elements(s):
+    N = len(bits(len(s) - 1))
+    candidates = set(range(N))
+    for h in range(1, len(s)):
+        t = trace(s, h)
+        for (i, x) in enumerate(t):
+            if i != 0 and i != len(t) - 1:
+                candidates.discard(x)
+    return candidates
+
 def generate_all_rsms(N):
     cs = list(combinations(range(N), 2))
     def generate_rsms(cs, i, current):
